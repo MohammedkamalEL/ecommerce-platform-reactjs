@@ -4,20 +4,40 @@ import {
   filterProducts,
 } from "../features/products/services/productService";
 import ProductCard from "../features/products/components/ProductCard";
+import { useSearchParams } from "react-router-dom";
 
 export default function ProductsPage() {
+  let [searchParams, setSearchParams] = useSearchParams();
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Basic state — not wired to filterProducts yet (student task)
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [sortBy, setSortBy] = useState("title");
-  const [sortOrder, setSortOrder] = useState("asc");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [selectedCategory, setSelectedCategory] = useState(
+    searchParams.get("category") || "",
+  );
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "title");
+  const [sortOrder, setSortOrder] = useState(
+    searchParams.get("sortOrder") || "asc",
+  );
+  const [currentPage, setCurrentPage] = useState(
+    Number(searchParams.get("page")) || 1,
+  );
   const [totalPages, settotalPages] = useState(1);
   const productsPerPage = 8;
+
+  useEffect(() => {
+    const params = {};
+    if (search) params.search = search;
+    if (selectedCategory) params.category = selectedCategory;
+    if (sortBy !== "title") params.sortBy = sortBy;
+    if (sortOrder !== "asc") params.sortOrder = sortOrder;
+    if (currentPage > 1) params.currentPage = currentPage;
+
+    setSearchParams(params);
+  }, [search, selectedCategory, sortBy, sortOrder, currentPage]);
 
   useEffect(() => {
     async function load() {
@@ -87,7 +107,7 @@ export default function ProductsPage() {
           <select
             value={selectedCategory}
             onChange={(e) => {
-              setSelectedCategory(e.target.value); 
+              setSelectedCategory(e.target.value);
               setCurrentPage(1);
             }}
             className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
