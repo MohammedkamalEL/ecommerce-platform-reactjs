@@ -114,7 +114,10 @@ export default function ProductDetailsPage() {
   }
 
   const time = formatCountdown(countdown);
-  console.log(reviews);
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -260,7 +263,10 @@ export default function ProductDetailsPage() {
                       <div>
                         <p className="font-bold text-gray-900">{review.user}</p>
                         <div className="flex mt-1">
-                          {renderStars(review.rating)} 
+                          {renderStars(review.rating)}
+                          <span className="text-gray-500">
+                            ({averageRating.toFixed(1)})
+                          </span>
                         </div>
                       </div>
 
@@ -269,9 +275,15 @@ export default function ProductDetailsPage() {
                     <p className="text-gray-600 leading-relaxed">
                       {review.comment}
                     </p>
-                    <p className="text-gray-600 leading-relaxed">
-                      {review.date}
-                    </p>
+                    <div>
+                      <span className="text-sm text-gray-400">
+                        {new Date(review.date).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
                   </div>
                 ))
               ) : (
