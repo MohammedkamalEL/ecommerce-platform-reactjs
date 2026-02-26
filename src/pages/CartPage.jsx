@@ -6,7 +6,6 @@ export default function CartPage() {
     const updateQuantity = useCartStore((s) => s.updateQuantity);
     const removeFromCart = useCartStore((s) => s.removeFromCart);
     const clearCart = useCartStore((s) => s.clearCart);
-
     const totalPrice = items.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
@@ -44,6 +43,7 @@ export default function CartPage() {
             </div>
         );
     }
+
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -119,9 +119,15 @@ export default function CartPage() {
                                         {/* BUG: Quantity can go to 0 or negative */}
                                         <button
                                             onClick={() =>
+                                            {
                                                 updateQuantity(item.id, item.quantity - 1)
+                                                
                                             }
-                                            className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-primary-600 transition-colors"
+                                            }
+                                            className={`w-8 h-8 flex items-center justify-center ${item.quantity === 1  ?
+                                                 "text-red-500 bg-gray-400 opacity-20 cursor-not-allowed"
+                                                 :
+                                                 'text-gray-500 hover:text-primary-600 transition-colors'}`}
                                         >
                                             −
                                         </button>

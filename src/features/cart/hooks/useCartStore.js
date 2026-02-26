@@ -42,6 +42,7 @@ const useCartStore = create((set, get) => ({
         if (newQuantity > item.stock) return;
 
         // BUG: No check for newQuantity <= 0
+        if (newQuantity < 1) return 1
         set({
             items: items.map((i) =>
                 i.id === productId ? { ...i, quantity: newQuantity } : i
