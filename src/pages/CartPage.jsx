@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import useCartStore from "../features/cart/hooks/useCartStore";
+import toast from "react-hot-toast";
+
 
 export default function CartPage() {
     const items = useCartStore((s) => s.items);
@@ -95,7 +97,11 @@ export default function CartPage() {
                                         </p>
                                     </div>
                                     <button
-                                        onClick={() => removeFromCart(item.id)}
+                                        onClick={() => {
+                                            removeFromCart(item.id)
+                                            toast.success(`Removing ${item.title} to wishlist!`);
+                                            
+                                        }}
                                         className="text-gray-400 hover:text-red-500 transition-colors shrink-0"
                                     >
                                         <svg

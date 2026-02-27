@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import useCartStore from "../../cart/hooks/useCartStore";
 import useWishlistStore from "../../wishlist/hooks/useWishlistStore";
 import useCompareStore from "../../compare/useCompareStore";
+import toast from "react-hot-toast";
 
 export default function ProductCard({ product }) {
   const addToCart = useCartStore((s) => s.addToCart);
@@ -9,7 +10,6 @@ export default function ProductCard({ product }) {
   // const addToWishlist = useWishlistStore((s) => s.addToWishlist);
   const isInWishlist = useWishlistStore((s) => s.isInWishlist(product.id));
 
-  
   const compareProducts = useCompareStore((s) => s.products);
   const addToCompare = useCompareStore((s) => s.addToCompare);
   const isInCompare = compareProducts.some((p) => p.id === product.id);
@@ -137,6 +137,11 @@ export default function ProductCard({ product }) {
             onClick={(e) => {
               e.preventDefault();
               toggleWishlist(product);
+              if (isInWishlist) {
+                toast.error(`Removed ${product.title} from wishlist`);
+              } else {
+                toast.success(`Added ${product.title} to wishlist!`);
+              }
             }}
             className={`p-2 rounded-full shadow-md transition-all duration-200 ${
               isInWishlist
@@ -158,6 +163,10 @@ export default function ProductCard({ product }) {
             onClick={(e) => {
               e.preventDefault();
               addToCompare(product);
+
+              if (!isInCompare) {
+                toast.success("Added to comparison list");
+              }
             }}
             className={`p-2 rounded-full shadow-md transition-all duration-200 ${
               isInCompare
@@ -180,8 +189,6 @@ export default function ProductCard({ product }) {
               />
             </svg>
           </button>
-
-
         </div>
       </Link>
 
@@ -207,7 +214,10 @@ export default function ProductCard({ product }) {
             ${product.price.toFixed(2)}
           </span>
           <button
-            onClick={() => addToCart(product)}
+            onClick={() => {
+              addToCart(product);
+              toast.success(`${product.title} added to cart!`);
+            }}
             disabled={product.stock === 0}
             className="px-3 py-1.5 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
