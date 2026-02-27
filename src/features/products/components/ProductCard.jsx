@@ -10,8 +10,9 @@ export default function ProductCard({ product }) {
   // const addToWishlist = useWishlistStore((s) => s.addToWishlist);
   const isInWishlist = useWishlistStore((s) => s.isInWishlist(product.id));
 
-  const compareProducts = useCompareStore((s) => s.products);
   const addToCompare = useCompareStore((s) => s.addToCompare);
+  // const removeFromCompare = useCompareStore((s) => s.removeFromCompare); // أضف هذا السطر
+  const compareProducts = useCompareStore((s) => s.products);
   const isInCompare = compareProducts.some((p) => p.id === product.id);
 
   const renderStars = (rating) => {
@@ -159,11 +160,10 @@ export default function ProductCard({ product }) {
           </button>
 
           {/* Compare button */}
-          <button
+          {/* <button
             onClick={(e) => {
               e.preventDefault();
               addToCompare(product);
-
               if (!isInCompare) {
                 toast.success("Added to comparison list");
               }
@@ -174,6 +174,47 @@ export default function ProductCard({ product }) {
                 : "bg-white/90 text-gray-400 hover:text-primary-600"
             }`}
             title="Add to Compare"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+          </button> */}
+
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              // if (isInCompare) {
+              //   removeFromCompare(product.id);
+              //   toast.error("Removed from comparison");
+              // } else {
+              //   addToCompare(product);
+              //   toast.success(`Replaced with ${product.title}`);
+              // }
+              if (!isInCompare) {
+                if (compareProducts.length >= 2) {
+                  toast.success(`Replaced with ${product.title}`);
+                } else {
+                  toast.success("Added to comparison list");
+                }
+                addToCompare(product);
+              }
+            }}
+            className={`p-2 rounded-full shadow-md transition-all duration-200 ${
+              isInCompare
+                ? "bg-primary-600 text-white"
+                : "bg-white/90 text-gray-400 hover:text-primary-600"
+            }`}
+            title={isInCompare ? "Remove from Compare" : "Add to Compare"}
           >
             <svg
               className="w-4 h-4"

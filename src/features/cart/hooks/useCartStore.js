@@ -1,38 +1,41 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-const useCartStore = create((set, get) => ({
-    items: [],
+const useCartStore = create(
+  persist(
+    (set, get) => ({
+      items: [],
 
-    addToCart: (product) => {
+      addToCart: (product) => {
         const items = get().items;
         const existingItem = items.find((item) => item.id === product.id);
 
         if (existingItem) {
-            // Prevent exceeding stock
-            if (existingItem.quantity >= product.stock) return;
-            set({
-                items: items.map((item) =>
-                    item.id === product.id
-                        ? { ...item, quantity: item.quantity + 1 }
-                        : item
-                ),
-            });
+          // Prevent exceeding stock
+          if (existingItem.quantity >= product.stock) return;
+          set({
+            items: items.map((item) =>
+              item.id === product.id
+                ? { ...item, quantity: item.quantity + 1 }
+                : item,
+            ),
+          });
         } else {
-            set({
-                items: [...items, { ...product, quantity: 1 }],
-            });
+          set({
+            items: [...items, { ...product, quantity: 1 }],
+          });
         }
-    },
+      },
 
-    removeFromCart: (productId) => {
+      removeFromCart: (productId) => {
         set({
-            items: get().items.filter((item) => item.id !== productId),
+          items: get().items.filter((item) => item.id !== productId),
         });
-    },
+      },
 
-    // BUG: This function does NOT prevent quantity from going to 0 or negative.
-    // Students must fix this by adding a minimum quantity check (quantity >= 1).
-    updateQuantity: (productId, newQuantity) => {
+      // BUG: This function does NOT prevent quantity from going to 0 or negative.
+      // Students must fix this by adding a minimum quantity check (quantity >= 1).
+      updateQuantity: (productId, newQuantity) => {
         const items = get().items;
         const item = items.find((i) => i.id === productId);
 
@@ -42,37 +45,62 @@ const useCartStore = create((set, get) => ({
         if (newQuantity > item.stock) return;
 
         // BUG: No check for newQuantity <= 0
-        if (newQuantity < 1) return 1
+        if (newQuantity < 1) return 1;
         set({
-            items: items.map((i) =>
-                i.id === productId ? { ...i, quantity: newQuantity } : i
-            ),
+          items: items.map((i) =>
+            i.id === productId ? { ...i, quantity: newQuantity } : i,
+          ),
         });
-    },
+      },
 
-    clearCart: () => set({ items: [] }),
+      clearCart: () => set({ items: [] }),
 
-    get totalItems() {
+      get totalItems() {
         return get().items.reduce((sum, item) => sum + item.quantity, 0);
-    },
+      },
 
-    get totalPrice() {
+      get totalPrice() {
         return get().items.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-        );
-    },
+          (sum, item) => sum + item.price * item.quantity,
+          0,
+        ) || 0;
+      },
 
-    getTotalItems: () => {
-        return get().items.reduce((sum, item) => sum + item.quantity, 0);
-    },
+      getTotalItems: () => {
+        const items = get().items || [];
+        return items.reduce((sum, item) => sum + item.quantity, 0);
+      },
 
-    getTotalPrice: () => {
-        return get().items.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-        );
-    },
-}));
+      getTotalPrice: () => {
+        const items = get().items || [];
+        return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      },
 
+      // getTotalItems: () => {
+      //   return get().items.reduce((sum, item) => sum + item.quantity, 0);
+      // },
+
+      // getTotalPrice: () => {
+      //   return get().items.reduce(
+      //     (sum, item) => sum + item.price * item.quantity,
+      //     0,
+      //   );
+      // },
+    }),
+    {
+      name: "cart-storage",
+      skipHydration: false,
+      onRehydrateStorage: () => {
+        console.log("الآن يبدأ استرجاع البيانات...");
+        return (state, error) => {
+          if (error) {
+            console.error("حدث خطأ أثناء الـ Hydration:", error);
+          } else {
+            console.log("تم استرجاع البيانات بنجاح، الحالة الحالية:", state);
+          }
+        };
+      },
+    },
+  ),
+);
 export default useCartStore;

@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { getProducts } from "../features/products/services/productService";
+import useCompareStore from "../features/compare/useCompareStore";
 
 export default function ComparePage() {
   const [product, setProducts] = useState([]);
-  const [selectedProductA, setSelectedProductA] = useState("");
-  const [selectedProductB, setSelectedProductB] = useState("");
+
+  const compareProducts = useCompareStore((state) => state.products);
+  const addToCompare = useCompareStore((state) => state.addToCompare);
+  const removeFromCompare = useCompareStore((state) => state.removeFromCompare);
+  const clearCompare = useCompareStore((state) => state.clearCompare);
 
   useEffect(() => {
     async function load() {
@@ -14,10 +18,9 @@ export default function ComparePage() {
     load();
   }, []);
 
-
-  // Comparison logic not implemented — student task
-  const productA = product.find((p) => p.id === Number(selectedProductA));
-  const productB = product.find((p) => p.id === Number(selectedProductB));
+  
+  const productA = compareProducts[0];
+  const productB = compareProducts[1];
 
   const comparisonFields = [
     { label: "Price", key: "price", format: (v) => `$${v?.toFixed(2) || "—"}` },
@@ -44,9 +47,17 @@ export default function ComparePage() {
     return "text-gray-900";
   };
 
-  const handleClearAll = () => {
-    setSelectedProductA("");
-    setSelectedProductB("");
+  const handleSelect = (productId, slot) => {
+    if (!productId) {
+      const productToRemove = slot === "A" ? productA : productB;
+      if (productToRemove) removeFromCompare(productToRemove.id);
+      return;
+    }
+
+    const selectedProduct = product.find((p) => p.id === Number(productId));
+    if (selectedProduct) {
+      addToCompare(selectedProduct);
+    }
   };
 
   return (
@@ -65,13 +76,17 @@ export default function ComparePage() {
             Product A
           </label>
           <select
-            value={selectedProductA}
-            onChange={(e) => setSelectedProductA(e.target.value)}
+            value={productA?.id || ""}
+            onChange={(e) => handleSelect(e.target.value, 'A')}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
           >
             <option value="">Select a product...</option>
             {product.map((p) => (
-              <option key={p.id} value={p.id} disabled={p.id === Number(selectedProductB)} >
+              <option
+                key={p.id}
+                value={p.id}
+                disabled={p.id === Number(productB)}
+              >
                 {p.title}
               </option>
             ))}
@@ -82,13 +97,17 @@ export default function ComparePage() {
             Product B
           </label>
           <select
-            value={selectedProductB}
-            onChange={(e) => setSelectedProductB(e.target.value)  }
+            value={productB?.id || ""}
+            onChange={(e) => handleSelect(e.target.value, 'B')}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
           >
             <option value="">Select a product...</option>
             {product.map((p) => (
-              <option key={p.id} value={p.id} disabled={p.id === Number(selectedProductA)}  >
+              <option
+                key={p.id}
+                value={p.id}
+                disabled={p.id === Number(productA)}
+              >
                 {p.title}
               </option>
             ))}
@@ -98,7 +117,7 @@ export default function ComparePage() {
 
       <div className="flex justify-end mb-4">
         <button
-          onClick={() => handleClearAll()} 
+          onClick={() => clearCompare()}
           className="bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 transition"
         >
           Clear All Comparison
